@@ -303,8 +303,8 @@
         marcadorInicio = L.marker([latitud, longitud]).addTo(map);
     }
     // Variables para almacenar las referencias a las polilíneas
-    var primeraPolyline;
-    var segundaPolyline;
+    var primeraPolyline = null;
+    var segundaPolyline = null;
     // Función para generar los recorridos
     function generarRecorrido() {
         // Borra las polilíneas anteriores si existen
@@ -329,9 +329,11 @@
                 primeraPolyline = L.polyline(primerRecorrido, { color: 'blue', weight: 5, opacity: 1 }).addTo(map);
                 segundaPolyline = L.polyline(segundoRecorrido, { color: 'red', weight: 5, opacity: 0.5 }).addTo(map);
 
-                // Ajustar el mapa a los límites de ambas polilíneas
-                map.fitBounds(primeraPolyline.getBounds());
-                map.fitBounds(segundaPolyline.getBounds());
+                // Unir los límites de ambas polilíneas
+                var bounds = primeraPolyline.getBounds().extend(segundaPolyline.getBounds());
+
+                // Ajustar el mapa a los límites combinados
+                map.fitBounds(bounds);
 
                 document.getElementById('longitud_primer_recorrido').innerText = longitud_primer_recorrido.toFixed(2);
                 document.getElementById('longitud_segundo_recorrido').innerText = longitud_segundo_recorrido.toFixed(2);
@@ -340,6 +342,7 @@
             })
             .catch(error => console.error('Error al generar los recorridos:', error));
     }
+
     document.addEventListener("DOMContentLoaded", function() {
         // Hacer una solicitud al servidor para ejecutar la función de inicialización
         fetch('/inicializar_distancia', {
@@ -352,7 +355,7 @@
         .catch(error => {
             console.error('Error al inicializar la distancia en el servidor:', error);
         });
-        agregarMarcadorInicio(latitud, longitud)
+        agregarMarcadorInicio(latitud, longitud);
     });
 </script>
 </body>
