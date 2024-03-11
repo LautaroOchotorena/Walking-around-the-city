@@ -1,3 +1,4 @@
 # Ignorar la carpeta "carpeta_a_evitar" y sus contenidos
 cache/
 env/
+.gitignore
