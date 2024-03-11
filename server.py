@@ -122,5 +122,11 @@ def cambiar_distancia():
     else:
         return '', 400
 
+@app.route('/inicializar_distancia', methods=['POST'])
+def inicializar_distancia():
+    global distancia_total_objetivo_km
+    distancia_total_objetivo_km = 2.5
+    return '', 204
+
 if __name__ == '__main__':
     app.run(debug=True)
