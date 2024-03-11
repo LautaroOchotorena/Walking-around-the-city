@@ -1,0 +1,3 @@
+# Ignorar la carpeta "carpeta_a_evitar" y sus contenidos
+env/
+cache/
