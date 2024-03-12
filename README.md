@@ -1,21 +1,40 @@
-# Are you tired of walking always to the same routes?
-This is a **walking aplication** where you can **select your city** and the **amount of kilometers** (up to 10km) you would like to walk (see blue route) and of course you would feel kinda tired after that excercice so it also generates the minimum walk to return to the original point you have selected (see red route).
+# Are you tired of always walking the same routes?
 
-The algorithm has a tendecy of chosing a route heading to the north. It was implemented to avoid chosing routes pretty close to the starting point but you can check it out and change it as you want.
+This is a **walking application** where you can **select your city** and the **distance** you would like to walk (up to 10 km). The blue route represents your chosen path, and after your exercise, the algorithm generates the minimum walk needed to return to your starting point (see red route).
 
-To **run** it you have **two options**: either download all the files and follow the steps I am going to give or enter to this [website](http://lautaro98.pythonanywhere.com) where you can play rightaway (I recommend this one but you won't be able to tune the algorithm as you want).
+The algorithm tends to choose routes heading north. While it was implemented to avoid selecting routes too close to the starting point, you can check it out and make adjustments as needed.
 
-For the first option I recommend to have an enviroment created just to not interfer to your current libraries.
+## How to Run It
 
-1) run in the console where it is the folder:
-\```bash
-python install -r requeriments.txt
-\```
-It will install all the dependencies neededed.
+You have **two options**:
 
-2) run:
-\```bash
-python server.py
-\```
+1. Download all the files and follow the steps I provide, or
+2. Visit this [**website**](http://lautaro98.pythonanywhere.com) where you can start right away (I recommend this option, but note that you won't be able to customize the algorithm).
 
-It will deploy the server and you can be able to open your web locally.
+For the first option, I recommend creating a separate environment to avoid interference with your current libraries.
+
+Follow these steps:
+
+1. In the console, navigate to the folder and run:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+    This will install all the necessary dependencies.
+
+2. Run:
+
+    ```bash
+    python server.py
+    ```
+
+    This will deploy the server, and you can open your web locally.
+
+## Potential Problems
+
+If the website encounters any issues or is down, please let me know.
+
+## Extra
+
+Most of the work was done using ChatGPT, following my provided instructions. While I have knowledge in Python, my proficiency in HTML, JavaScript, and CSS is limited.
