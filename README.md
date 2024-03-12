@@ -3,7 +3,7 @@ This is a **walking aplication** where you can **select your city** and the **di
 
 The algorithm has a tendecy of chosing a route heading to the north. It was implemented to avoid chosing routes pretty close to the starting point but you can check it out and change it as you want.
 
-!(https://github.com/LautaroOchotorena/Walking-around-the-city/blob/master/Example.jpg)
+![Example](https://github.com/LautaroOchotorena/Walking-around-the-city/blob/master/Example.jpg)
 
 ## How to Run It
 
