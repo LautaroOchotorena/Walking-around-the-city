@@ -6,126 +6,116 @@ from geopy.geocoders import Nominatim
 
 app = Flask(__name__)
 
-@app.route('/dynamic_route')
-def dynamic_route():
-    # Tu lógica para generar contenido dinámico
-    response = make_response(render_template('dynamic_template.html'))
-
-    # Establecer encabezado Cache-Control para cachear durante 1 hora
-    response.headers['Cache-Control'] = 'public, max-age=3600'  # Cachear durante 1 hora
-
-    return response
-
-def obtener_coordenadas(ciudad):
-    global latitud, longitud
-    geolocator = Nominatim(user_agent="mi_app")
+def get_coordinates(city):
+    global latitude, longitude
+    geolocator = Nominatim(user_agent="my_app")
     try:
-        location = geolocator.geocode(ciudad)
+        location = geolocator.geocode(city)
         if location:
-            latitud, longitud = location.latitude, location.longitude
+            latitude, longitude = location.latitude, location.longitude
             return True  # Success
     except Exception as e:
-        print(f"Error in obtener_coordenadas: {e}")
+        print(f"Error in get_coordinates: {e}")
     return False  # Failure
 
-ciudad = "La Plata"
-distancia_total_objetivo_km = 2.5
-obtener_coordenadas(ciudad)
+city = "La Plata"
+target_total_distance_km = 3
+get_coordinates(city)
 success = True
 
-def generar_recorrido():    
-    graph = ox.graph_from_point((latitud, longitud), dist=distancia_total_objetivo_km*200+2000, network_type='drive')
+def generate_route():
+    graph = ox.graph_from_point((latitude, longitude), dist=target_total_distance_km*200+2000, network_type='drive')
     graph = ox.utils_graph.get_undirected(graph)
 
-    # Encontrar el nodo más cercano
-    nodo_inicio = ox.distance.nearest_nodes(graph, X=longitud, Y=latitud)
+    # Find the nearest node
+    start_node = ox.distance.nearest_nodes(graph, X=longitude, Y=latitude)
 
     # Initialize the existing path
-    recorrido = [nodo_inicio]
+    route = [start_node]
 
-    distancia_recorrida_km = 0.0
+    traveled_distance_km = 0.0
     # Attempt to generate a closed circuit of 5 km without repeating nodes
-    while distancia_recorrida_km < distancia_total_objetivo_km:
-        nodo_actual = recorrido[-1]
-        nodos_no_visitados = set(graph.neighbors(nodo_actual)) - set(recorrido)
+    while traveled_distance_km < target_total_distance_km:
+        current_node = route[-1]
+        unvisited_nodes = set(graph.neighbors(current_node)) - set(route)
 
-        if not nodos_no_visitados:
-            recorrido = [nodo_inicio]
-            distancia_recorrida_km = 0.0
+        if not unvisited_nodes:
+            route = [start_node]
+            traveled_distance_km = 0.0
             continue
 
         # Calculate probabilities for node selection
-        max_y_node = max(nodos_no_visitados, key=lambda node: graph.nodes[node]['y']*0.5-graph.nodes[node]['x']*0.5)
-        probabilities = [0.8 if node == max_y_node else 0.2 for node in nodos_no_visitados]
+        max_y_node = max(unvisited_nodes, key=lambda node: graph.nodes[node]['y']*0.5-graph.nodes[node]['x']*0.5)
+        probabilities = [0.8 if node == max_y_node else 0.2 for node in unvisited_nodes]
 
         # Choose the next node based on probabilities
-        nodo_siguiente = random.choices(list(nodos_no_visitados), weights=probabilities)[0]
+        next_node = random.choices(list(unvisited_nodes), weights=probabilities)[0]
 
-        distancia_entre_nodos_km = graph[nodo_actual][nodo_siguiente][0]['length'] / 1000.0
-        recorrido.append(nodo_siguiente)
-        distancia_recorrida_km += distancia_entre_nodos_km
+        distance_between_nodes_km = graph[current_node][next_node][0]['length'] / 1000.0
+        route.append(next_node)
+        traveled_distance_km += distance_between_nodes_km
 
     # Find the shortest path from the last node of the existing path back to the initial node
-    nodo_final = recorrido[-1]
-    nuevo_recorrido = nx.shortest_path(graph, source=nodo_final, target=nodo_inicio, weight='length')[0:]
-    longitud_del_nuevo_recorrido = nx.shortest_path_length(graph, source=nodo_final, target=nodo_inicio, weight='length')/1000.0
+    final_node = route[-1]
+    new_route = nx.shortest_path(graph, source=final_node, target=start_node, weight='length')[0:]
+    new_route_length = nx.shortest_path_length(graph, source=final_node, target=start_node, weight='length')/1000.0
 
-    coordenadas_recorrido_1 = [(graph.nodes[nodo]['y'], graph.nodes[nodo]['x']) for nodo in recorrido]
-    coordenadas_recorrido_2 = [(graph.nodes[nodo]['y'], graph.nodes[nodo]['x']) for nodo in nuevo_recorrido]
-    return coordenadas_recorrido_1, coordenadas_recorrido_2, distancia_recorrida_km, longitud_del_nuevo_recorrido
+    coordinates_route_1 = [(graph.nodes[node]['y'], graph.nodes[node]['x']) for node in route]
+    coordinates_route_2 = [(graph.nodes[node]['y'], graph.nodes[node]['x']) for node in new_route]
+    return coordinates_route_1, coordinates_route_2, traveled_distance_km, new_route_length
 
 @app.route('/')
 def index():
-    return render_template('index.html', latitud=latitud, longitud=longitud, success=success)
+    return render_template('index.html', latitude=latitude, longitude=longitude, success=success)
 
-@app.route('/generar_recorrido')
-def generar_recorrido_ajax():
-    primer_recorrido, segundo_recorrido, distancia_primer_recorrido , distancia_segundo_recorrido = generar_recorrido()
-    return jsonify({'primer_recorrido': primer_recorrido,
-        'segundo_recorrido': segundo_recorrido,
-        'longitud_primer_recorrido':distancia_primer_recorrido,
-        'longitud_segundo_recorrido':distancia_segundo_recorrido})
+@app.route('/generate_route')
+def generate_route_ajax():
+    first_route, second_route, first_route_distance, second_route_distance = generate_route()
+    return jsonify({'first_route': first_route,
+                    'second_route': second_route,
+                    'first_route_length': first_route_distance,
+                    'second_route_length': second_route_distance})
 
-# Ruta para manejar el punto seleccionado desde el cliente
-@app.route('/manejar_punto_seleccionado', methods=['POST'])
-def manejar_punto_seleccionado():
-    global latitud, longitud
+# Route to handle the selected point from the client
+@app.route('/handle_selected_point', methods=['POST'])
+def handle_selected_point():
+    global latitude, longitude
 
     data = request.get_json()
-    punto_seleccionado = data['puntoSeleccionado']
+    selected_point = data['selectedPoint']
     
-    # Actualizar las coordenadas con el punto seleccionado
-    latitud = punto_seleccionado['latitud']
-    longitud = punto_seleccionado['longitud']
+    # Update the coordinates with the selected point
+    latitude = selected_point['latitude']
+    longitude = selected_point['longitude']
 
     return jsonify()
 
-@app.route('/cambiar_ciudad', methods=['POST'])
-def cambiar_ciudad():
-    global success, latitud, longitud, ciudad
-    nueva_ciudad = request.form.get('nueva_ciudad')
-    if nueva_ciudad:
-        ciudad = nueva_ciudad
-        success = obtener_coordenadas(ciudad)
+@app.route('/change_city', methods=['POST'])
+def change_city():
+    global success, latitude, longitude, city
+    new_city = request.form.get('new_city')
+    if new_city:
+        city = new_city
+        success = get_coordinates(city)
         if success:
-            return jsonify({'latitud': latitud, 'longitud': longitud, 'success': success})
+            return jsonify({'latitude': latitude, 'longitude': longitude, 'success': success})
     return jsonify({'success': False})
 
-@app.route('/cambiar_distancia', methods=['POST'])
-def cambiar_distancia():
-    global distancia_total_objetivo_km
-    nueva_distancia = request.form.get('distancia_objetivo')
+@app.route('/change_distance', methods=['POST'])
+def change_distance():
+    global target_total_distance_km
+    new_distance = request.form.get('target_distance')
     
-    if nueva_distancia is not None:
-        distancia_total_objetivo_km = float(nueva_distancia)
+    if new_distance is not None:
+        target_total_distance_km = float(new_distance)
         return '', 204
     else:
         return '', 400
 
-@app.route('/inicializar_distancia', methods=['POST'])
-def inicializar_distancia():
-    global distancia_total_objetivo_km
-    distancia_total_objetivo_km = 2.5
+@app.route('/initialize_distance', methods=['POST'])
+def initialize_distance():
+    global target_total_distance_km
+    target_total_distance_km = 3
     return '', 204
 
 if __name__ == '__main__':

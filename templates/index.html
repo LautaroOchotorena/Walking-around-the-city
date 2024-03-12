@@ -3,360 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa del Recorrido</title>
-    <!-- Agrega enlaces a las bibliotecas de Folium y Leaflet -->
+    <!-- Add links to Folium and Leaflet libraries -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/folium@0.14.0"></script>
-    <!-- Configuración de cache para recursos estáticos -->
-    <meta http-equiv="Cache-Control" content="max-age=3600"> <!-- Cache durante 1 hora -->
+    <!-- Cache configuration for static resources -->
+    <meta http-equiv="Cache-Control" content="max-age=3600"> <!-- Cache for 1 hour -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<style>
-    body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f8f8;
-            margin-top: 5px;
-        }
-
-        header {
-            background-color: #333;
-            color: white;
-            padding: 10px;
-            text-align: center;
-        }
-
-        main {
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        button {
-            background-color: #4285f4;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #1a73e8;
-        }
-
-        form {
-            margin-top: 10px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        input {
-            padding: 8px;
-            margin-bottom: 10px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-    p {
-        margin: 10px 0;
-    }
-    /* Add styles for the "pressed" state of the button */
-    button:active {
-        background-color: lightblue;
-        /* Add any other styling you want for the pressed state */
-    }
-    .top-right {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-    }
-    .flag-icon {
-        width: 40px; /* Adjust as needed */
-        height: 40px; /* Fixed height to maintain square aspect ratio */
-        cursor: pointer;
-        margin-right: 5px; /* Adjust spacing as needed */
-        border-radius: 50%; /* Make the icon circular */
-        border: 1px solid #ccc; /* Add a border for better visibility */
-        overflow: hidden; /* Ensure the border-radius works as expected */
-    }
-     /* Estilo base para todas las resoluciones */
-     #map {
-            height: 300px;      
-        }
-    /* Media query for smaller screens */
-    @media only screen and (max-width: 768px) {
-        .flag-icon {
-            width: 1.5rem; /* Adjust for smaller screens */
-            height: 1.5rem;
-        }
-
-        #map {
-            height: 300px; /* Altura ajustada para pantallas pequeñas */
-            }
-    }
-    /* Media query for medium-sized screens */
-    @media only screen and (min-width: 769px) and (max-width: 1024px) {
-        .flag-icon {
-            width: 2rem; /* Adjust for medium-sized screens */
-            height: 2rem;
-        }
-        #map {
-            height: 400px; /* Altura ajustada para pantallas medianas */
-            }
-    }
-    /* Media query for larger screens */
-    @media only screen and (min-width: 1025px) {
-        .flag-icon {
-            width: 2.5rem; /* Adjust for larger screens */
-            height: 2.5rem;
-        }
-        #map {
-            height: 440px; /* Altura ajustada para pantallas grandes */
-            }
-    }
-    /* Media query for extra small screens (por ejemplo, teléfonos pequeños) */
-    @media only screen and (max-width: 375px) {
-        .flag-icon {
-            width: 1rem; /* Ajustar para pantallas muy pequeñas */
-            height: 1rem;
-        }
-        #map {
-            height: 250px; /* Altura ajustada para pantallas muy pequeñas */
-                    }
-    }
-    /* Media query for small screens (por ejemplo, teléfonos medianos y tabletas en modo retrato) */
-    @media only screen and (min-width: 376px) and (max-width: 768px) {
-        .flag-icon {
-            width: 1.5rem; /* Ajustar para pantallas pequeñas */
-            height: 1.5rem;
-        }
-        #map {
-            height: 350px; /* Altura ajustada para pantallas pequeñas */
-            }
-    }
-</style>
 <body>
-    <!-- Botón para seleccionar un punto -->
-    <button onclick="habilitarSeleccion()" id="btnSeleccionarInicio">Seleccionar inicio</button>
-    <!-- Agrega un botón para generar el recorrido -->
-    <button onclick="generarRecorrido()" id="btnGenerarRecorrido">Generar recorrido</button>
-    <!-- Boton distancia -->
-    <form method="post" action="{{ url_for('cambiar_distancia') }}" id="formularioDistancia">
-    <label for="distancia_objetivo" id="Distanciadeida">Distancia de ida (km):</label>
-    <input type="number" id="distancia_objetivo" name="distancia_objetivo" step="0.1" min="0" max="10" value="2.5" oninput="actualizarDistanciaObjetivo()">
+    <!-- Button to select a point -->
+    <button onclick="enableSelection()" id="btnSelectStart">Select start</button>
+    <!-- Add a button to generate the route -->
+    <button onclick="generateRoute()" id="btnGenerateRoute">Generate route</button>
+    <!-- Distance button -->
+    <form method="post" action="{{ url_for('change_distance') }}" id="distanceForm">
+        <label for="target_distance" id="OneWayDistance">One-way distance (km):</label>
+        <input type="number" id="target_distance" name="target_distance" step="0.1" min="0" max="10" value="3" oninput="updateTargetDistance()">
     </form>
-    <!-- Cambiar ciudad -->
-    <form method="post" action="{{ url_for('cambiar_ciudad') }}" onsubmit="event.preventDefault(); cambiarCiudad();">
-    <label for="nueva_ciudad" id="City">Ciudad:</label>
-    <input type="text" id="nueva_ciudad" name="nueva_ciudad" required>
-    <button type="submit" id='Change'>Cambiar</button>
+    <!-- Change city -->
+    <form method="post" action="{{ url_for('change_city') }}" onsubmit="event.preventDefault(); changeCity();">
+        <label for="new_city" id="City">City:</label>
+        <input type="text" id="new_city" name="new_city" required>
+        <button type="submit" id='Change'>Change</button>
     </form>
-    <!-- Mapa -->
+    <!-- Map -->
     <div id="map"></div>
-    <!-- Longitud de rutas -->
-    <p id='Blue_route_length' style="display: inline;">Longitud recorrido azul: </p><span id="longitud_primer_recorrido" style="display: inline;">0.00</span> km </p>
-    <p id='Red_route_length' style="display: inline;">Longitud recorrido rojo: </p><span id="longitud_segundo_recorrido" style="display: inline;">0.00</span> km </p>       
-    <p id='Total_route_length' style="display: inline;">Total: </p> <span id="longitud_total" style="display: inline;">0.00</span> km
+    <!-- Route lengths -->
+    <p id='Blue_route_length' style="display: inline;">Blue route length: </p><span id="first_route_length" style="display: inline;">0.00</span> km </p>
+    <p id='Red_route_length' style="display: inline;">Red route length: </p><span id="second_route_length" style="display: inline;">0.00</span> km </p>       
+    <p id='Total_route_length' style="display: inline;">Total: </p> <span id="total_length" style="display: inline;">0.00</span> km
     <!-- Flags -->
     <div class="top-right">
         <img src="{{ url_for('static', filename='spanish_flag.webp') }}" alt="Spanish Flag" class="flag-icon" onclick="changeLanguage('es')">
         <img src="{{ url_for('static', filename='english_flag.webp') }}" alt="English Flag" class="flag-icon" onclick="changeLanguage('en')">
     </div>
-<script>
-     // Define translations directly in JavaScript
-    var translations_data = {
-        'es': ['Seleccionar inicio', 'Generar recorrido', 'Distancia de ida (km):',
-               'Ciudad:', 'Cambiar', 'Longitud recorrido azul: ', 'Longitud recorrido rojo: ',
-               'Total: ', 'Error: La distancia objetivo debe estar entre 0 y 10.',
-               'No se pudo cargar la ciudad, intente de nuevo.'],
-        'en': ['Select start', 'Generate route', 'One-way distance (km):',
-                'City:', 'Change', 'Blue route length: ', 'Red route length: ',
-                'Total: ', 'Error: The target distance must be between 0 and 10.',
-                'Failed to load the city, please try again.'],
-    };
-    // Initial language
-    var currentLanguage = 'es';
-    // Function to change the language
-    function changeLanguage(lang) {
-        currentLanguage = lang;
-        updateTranslations();
-    }
-    // Function to update the translations based on the current language
-    function updateTranslations() {
-        document.getElementById('btnSeleccionarInicio').innerText = translations_data[currentLanguage][0];
-        document.getElementById('btnGenerarRecorrido').innerText = translations_data[currentLanguage][1];
-        document.getElementById('Distanciadeida').innerText = translations_data[currentLanguage][2];
-        document.getElementById('City').innerText = translations_data[currentLanguage][3];
-        document.getElementById('Change').innerText = translations_data[currentLanguage][4];
-        document.getElementById('Blue_route_length').innerText = translations_data[currentLanguage][5];
-        document.getElementById('Red_route_length').innerText = translations_data[currentLanguage][6];
-        document.getElementById('Total_route_length').innerText = translations_data[currentLanguage][7];
-    }
-
-    // Initial call to update translations for the default language (e.g., 'es')
-    updateTranslations();
-    // Presionar distancia
-    function actualizarDistanciaObjetivo() {
-        var formulario = document.getElementById('formularioDistancia');
-        var formData = new FormData(formulario);
-        var distanciaInput = document.getElementById('distancia_objetivo');
-
-        var nuevaDistancia = distanciaInput.value;
-
-        // Verifica que la distancia esté en el rango deseado
-        if (isNaN(nuevaDistancia) || nuevaDistancia < 0 || nuevaDistancia > 10) {
-            alert(translations_data[currentLanguage][8]);
-            return false;  // Evita que el formulario se envíe
-        }
-
-        // Realiza una solicitud AJAX para cambiar la distancia en el servidor
-        fetch(formulario.action, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-        })
-        .catch(error => {
-            console.error('Error al actualizar la distancia en el servidor:', error);
-        });
-    }
-    // Cargar mapa
-    var latitud = {{ latitud }};
-    var longitud = {{ longitud }};
-    var map = L.map('map').setView([latitud, longitud], 15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    }).addTo(map);
-    // Cambiar ciudad
-    function cambiarCiudad() {
-        var nuevaCiudad = document.getElementById('nueva_ciudad').value;
-
-        fetch('/cambiar_ciudad', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'nueva_ciudad=' + nuevaCiudad,
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Recargar el mapa
-                map.setView([data.latitud, data.longitud], 15);
-            } else {
-                alert(translations_data[currentLanguage][9]);
-            }
-        })
-        .catch(error => console.error('Error al cambiar la ciudad:', error));
-    }
-
-    var seleccionHabilitada = false;
-
-    function habilitarSeleccion() {
-        seleccionHabilitada = true;
-        map.on('click', onMapClick);
-        document.getElementById('map').style.cursor = 'default';
-    }
-    function onMapClick(e) {
-        if (seleccionHabilitada) {
-            seleccionHabilitada = false;
-            map.off('click', onMapClick);
-            var puntoSeleccionado = {
-                latitud: e.latlng.lat,
-                longitud: e.latlng.lng
-            };
-
-            // Enviar el punto seleccionado al servidor
-            enviarPuntoSeleccionadoAlServidor(puntoSeleccionado);
-        }
-    }
-    function enviarPuntoSeleccionadoAlServidor(puntoSeleccionado) {
-        // Restaurar el cursor al estilo predeterminado
-        document.getElementById('map').style.cursor = 'grab';
-        // Realiza una solicitud al servidor para manejar el punto seleccionado
-        fetch('/manejar_punto_seleccionado', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ puntoSeleccionado: puntoSeleccionado })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Actualizar el mapa con el nuevo recorrido
-            agregarMarcadorInicio(puntoSeleccionado.latitud, puntoSeleccionado.longitud);
-        })
-        .catch(error => console.error('Error al enviar el punto seleccionado al servidor:', error));
-    }
-
-    var marcadorInicio;
-    function agregarMarcadorInicio(latitud, longitud) {
-    // Crea el marcador con el icono predeterminado y agrega al mapa
-        if (marcadorInicio) {
-            map.removeLayer(marcadorInicio);
-        }
-        marcadorInicio = L.marker([latitud, longitud]).addTo(map);
-    }
-    // Variables para almacenar las referencias a las polilíneas
-    var primeraPolyline = null;
-    var segundaPolyline = null;
-    // Función para generar los recorridos
-    function generarRecorrido() {
-        // Borra las polilíneas anteriores si existen
-        if (primeraPolyline) {
-            map.removeLayer(primeraPolyline);
-        }
-        if (segundaPolyline) {
-            map.removeLayer(segundaPolyline);
-        }
-
-        // Hacer una solicitud al servidor para obtener los nuevos recorridos
-        fetch('/generar_recorrido')
-            .then(response => response.json())
-            .then(data => {
-                // Actualizar el mapa con los nuevos recorridos
-                var primerRecorrido = data.primer_recorrido;
-                var segundoRecorrido = data.segundo_recorrido;
-                var longitud_primer_recorrido = data.longitud_primer_recorrido;
-                var longitud_segundo_recorrido = data.longitud_segundo_recorrido;
-
-                // Dibujar polilíneas para los nuevos recorridos
-                primeraPolyline = L.polyline(primerRecorrido, { color: 'blue', weight: 5, opacity: 1 }).addTo(map);
-                segundaPolyline = L.polyline(segundoRecorrido, { color: 'red', weight: 5, opacity: 0.5 }).addTo(map);
-
-                // Unir los límites de ambas polilíneas
-                var bounds = primeraPolyline.getBounds().extend(segundaPolyline.getBounds());
-
-                // Ajustar el mapa a los límites combinados
-                map.fitBounds(bounds);
-
-                document.getElementById('longitud_primer_recorrido').innerText = longitud_primer_recorrido.toFixed(2);
-                document.getElementById('longitud_segundo_recorrido').innerText = longitud_segundo_recorrido.toFixed(2);
-                document.getElementById('longitud_total').innerText = (longitud_primer_recorrido+longitud_segundo_recorrido).toFixed(2);
-
-            })
-            .catch(error => console.error('Error al generar los recorridos:', error));
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        // Hacer una solicitud al servidor para ejecutar la función de inicialización
-        fetch('/inicializar_distancia', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => {})
-        .catch(error => {
-            console.error('Error al inicializar la distancia en el servidor:', error);
-        });
-        agregarMarcadorInicio(latitud, longitud);
-    });
-</script>
+    <script>
+        // Load map
+        var latitude = {{ latitude }};
+        var longitude = {{ longitude }};
+        var map = L.map('map').setView([latitude, longitude], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        }).addTo(map);
+    </script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

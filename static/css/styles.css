@@ -1,0 +1,137 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f8f8;
+    margin-top: 5px;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+main {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+button {
+    background-color: #4285f4;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #1a73e8;
+}
+
+form {
+    margin-top: 10px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input {
+    padding: 8px;
+    margin-bottom: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+p {
+    margin: 10px 0;
+}
+
+/* Add styles for the "pressed" state of the button */
+button:active {
+    background-color: lightblue;
+    /* Add any other styling you want for the pressed state */
+}
+
+.top-right {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.flag-icon {
+    width: 40px; /* Adjust as needed */
+    height: 40px; /* Fixed height to maintain square aspect ratio */
+    cursor: pointer;
+    margin-right: 5px; /* Adjust spacing as needed */
+    border-radius: 50%; /* Make the icon circular */
+    border: 1px solid #ccc; /* Add a border for better visibility */
+    overflow: hidden; /* Ensure the border-radius works as expected */
+}
+
+/* Base style for all resolutions */
+#map {
+    height: 300px;
+}
+
+/* Media query for smaller screens */
+@media only screen and (max-width: 768px) {
+    .flag-icon {
+        width: 1.5rem; /* Adjust for smaller screens */
+        height: 1.5rem;
+    }
+
+    #map {
+        height: 300px; /* Adjusted height for small screens */
+    }
+}
+
+/* Media query for medium-sized screens */
+@media only screen and (min-width: 769px) and (max-width: 1024px) {
+    .flag-icon {
+        width: 2rem; /* Adjust for medium-sized screens */
+        height: 2rem;
+    }
+    #map {
+        height: 400px; /* Adjusted height for medium screens */
+    }
+}
+
+/* Media query for larger screens */
+@media only screen and (min-width: 1025px) {
+    .flag-icon {
+        width: 2.5rem; /* Adjust for larger screens */
+        height: 2.5rem;
+    }
+    #map {
+        height: 440px; /* Adjusted height for large screens */
+    }
+}
+
+/* Media query for extra small screens (e.g., small phones) */
+@media only screen and (max-width: 375px) {
+    .flag-icon {
+        width: 1rem; /* Adjust for very small screens */
+        height: 1rem;
+    }
+    #map {
+        height: 250px; /* Adjusted height for very small screens */
+    }
+}
+
+/* Media query for small screens (e.g., medium phones and tablets in portrait mode) */
+@media only screen and (min-width: 376px) and (max-width: 768px) {
+    .flag-icon {
+        width: 1.5rem; /* Adjust for small screens */
+        height: 1.5rem;
+    }
+    #map {
+        height: 350px; /* Adjusted height for small screens */
+    }
+}
