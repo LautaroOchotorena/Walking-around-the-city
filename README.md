@@ -1,4 +1,4 @@
-# Are you tired of walking always to the same routes?
+# Are you tired of walking always the same routes?
 This is a **walking aplication** where you can **select your city** and the **distance** (up to 10km) you would like to walk (see blue route) and of course you would feel kinda tired after that excercice so it also generates the minimum walk needed to return to your starting point (see red route).
 
 The algorithm has a tendecy of chosing a route heading to the north. It was implemented to avoid chosing routes pretty close to the starting point but you can check it out and change it as you want.
