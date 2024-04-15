@@ -40,4 +40,4 @@ If the problem persists, please let me know.
 
 ## Extra
 
-Most of the work was done using ChatGPT, following my provided instructions. While I have knowledge in Python, my proficiency in HTML, JavaScript, and CSS is limited.
+Most of the work was done using ChatGPT, following my provided instructions. Even though I have knowledge in Python, my proficiency in HTML, JavaScript, and CSS is limited.
