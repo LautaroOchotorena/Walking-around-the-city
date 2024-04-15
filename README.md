@@ -34,7 +34,9 @@ Follow these steps:
 
 ## Potential Problems
 
-If the website encounters any issues or is down, please let me know.
+The website may experience downtime if it remains inactive for a period of time. Reload the page.
+
+If the problem persists, please let me know.
 
 ## Extra
 
