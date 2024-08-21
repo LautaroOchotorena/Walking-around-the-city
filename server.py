@@ -18,7 +18,7 @@ def get_coordinates(city):
         print(f"Error in get_coordinates: {e}")
     return False  # Failure
 
-city = "La Plata"
+city = "La Plata, Buenos Aires, Argentina"
 target_total_distance_km = 3
 get_coordinates(city)
 success = True
