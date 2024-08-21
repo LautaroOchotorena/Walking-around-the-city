@@ -10,6 +10,12 @@
     <!-- Cache configuration for static resources -->
     <meta http-equiv="Cache-Control" content="max-age=3600"> <!-- Cache for 1 hour -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Change City</title>
+    <style>
+        #new_city::placeholder {
+            color: grey;
+        }
+    </style>
 </head>
 <body>
     <!-- Button to select a point -->
@@ -25,7 +31,7 @@
     <form method="post" action="{{ url_for('change_city') }}" onsubmit="event.preventDefault(); changeCity();">
         <label for="new_city" id="City">City:</label>
         <input type="text" id="new_city" name="new_city" required>
-        <button type="submit" id='Change'>Change</button>
+        <button type="submit" id="Change">Change</button>
     </form>
     <!-- Map -->
     <div id="map"></div>

@@ -3,11 +3,13 @@ var translations_data = {
     'es': ['Seleccionar inicio', 'Generar recorrido', 'Distancia de ida (km):',
            'Ciudad:', 'Cambiar', 'Longitud recorrido azul: ', 'Longitud recorrido rojo: ',
            'Total: ', 'Error: La distancia objetivo debe estar entre 0 y 10.',
-           'No se pudo cargar la ciudad, intente de nuevo.'],
+           'No se pudo cargar la ciudad, intente de nuevo.',
+           'Cambiar ciudad'],
     'en': ['Select start', 'Generate route', 'One-way distance (km):',
             'City:', 'Change', 'Blue route length: ', 'Red route length: ',
             'Total: ', 'Error: The target distance must be between 0 and 10.',
-            'Failed to load the city, please try again.'],
+            'Failed to load the city, please try again.',
+            'Change City'],
 };
 // Initial language
 var currentLanguage = 'en';
@@ -26,6 +28,9 @@ function updateTranslations() {
     document.getElementById('Blue_route_length').innerText = translations_data[currentLanguage][5];
     document.getElementById('Red_route_length').innerText = translations_data[currentLanguage][6];
     document.getElementById('Total_route_length').innerText = translations_data[currentLanguage][7];
+    var inputElement = document.getElementById('new_city');
+    var placeholderText = translations_data[currentLanguage][10];
+    inputElement.placeholder = placeholderText;
 }
 
 // Initial call to update translations for the default language (e.g., 'es')
@@ -55,26 +60,32 @@ function updateTargetDistance() {
 }
 // Change city
 function changeCity() {
-    var newCity = document.getElementById('new_city').value;
+            var newCity = document.getElementById('new_city').value;
 
-    fetch('/change_city', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'new_city=' + newCity,
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Reload the map
-            map.setView([data.latitude, data.longitude], 15);
-        } else {
-            alert(translations_data[currentLanguage][9]);
+            fetch('/change_city', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'new_city=' + encodeURIComponent(newCity),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reload the map
+                    map.setView([data.latitude, data.longitude], 15);
+
+                    // Update the placeholder with the new city
+                    document.getElementById('new_city').placeholder = newCity;
+
+                    // Optionally clear the input field if needed
+                    document.getElementById('new_city').value = '';
+                } else {
+                    alert(translations_data[currentLanguage][9]);
+                }
+            })
+            .catch(error => console.error('Error changing the city:', error));
         }
-    })
-    .catch(error => console.error('Error changing the city:', error));
-}
 
 var selectionEnabled = false;
 
@@ -165,6 +176,10 @@ function generateRoute() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+    var inputElement = document.getElementById('new_city');
+    var placeholderText = translations_data[currentLanguage][10]; // Default to the translation for 'City:'
+    inputElement.placeholder = placeholderText;
+
     // Make a request to the server to execute the initialization function
     fetch('/initialize_distance', {
         method: 'POST',
