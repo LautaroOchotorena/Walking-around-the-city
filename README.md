@@ -34,7 +34,7 @@ Follow these steps:
 
 ## Potential Problems
 
-The website may experience downtime if it remains inactive for a period of time. Reload the page.
+The website may experience downtime if it remains inactive for a period of time. Reload the page. It may take a few seconds to load.
 
 If the problem persists, please let me know.
 
