@@ -7,12 +7,13 @@ The algorithm has a tendecy of chosing a route heading to the north. It was impl
 
 ## How to Run It
 
-You have **two options**:
+You have **three options**:
 
 1. Download all the files and follow the steps I provide, or
 2. Visit this [**website**](http://lautaro98.pythonanywhere.com) where you can start right away (I recommend this option, but note that you won't be able to customize the algorithm).
+3. Create a codespace (recommended if option 2 isn't working)
 
-For the first option, I recommend creating a separate environment to avoid interference with your current libraries.
+For the **first option**, I recommend creating a separate environment to avoid interference with your current libraries.
 
 Follow these steps:
 
@@ -31,6 +32,22 @@ Follow these steps:
     ```
 
     This will deploy the server, and you can open your web locally.
+
+For the **third option**:
+
+On the repository's main page,
+1. Click the green Code button.
+2. Select Codespaces.
+3. Create a codespace.
+4. Wait until the python version and the requirements are intalled.
+5. Run in the console:
+
+    ```bash
+    python server.py
+    ```
+
+6. Click on ports and open the url.
+
 
 ## Potential Problems
 
