@@ -11,13 +11,19 @@ You have **three options**:
 
 1. Download all the files and follow the steps I provide, or
 2. Visit this [**website**](http://lautaro98.pythonanywhere.com) where you can start right away (I recommend this option, but note that you won't be able to customize the algorithm).
-3. Create a codespace (recommended if option 2 isn't working)
+3. Create a codespace (recommended if option 2 isn't working).
 
 For the **first option**, I recommend creating a separate environment to avoid interference with your current libraries.
 
 Follow these steps:
 
-1. In the console, navigate to the folder and run:
+1. Clone the repository using git or download everything by yourself:
+     ```bash
+    git clone https://github.com/LautaroOchotorena/Walking-around-the-city
+    cd Walking-around-the-city
+    ```
+
+2. In the console, navigate to the folder and run:
 
     ```bash
     pip install -r requirements.txt
@@ -25,7 +31,7 @@ Follow these steps:
 
     This will install all the necessary dependencies.
 
-2. Run:
+3. Run:
 
     ```bash
     python server.py
@@ -47,7 +53,6 @@ On the repository's main page,
     ```
 
 6. Click on ports and open the url.
-
 
 ## Potential Problems
 
