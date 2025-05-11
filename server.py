@@ -23,6 +23,8 @@ target_total_distance_km = 3
 get_coordinates(city)
 success = True
 
+ox.settings.use_cache = False
+
 def generate_route():
     graph = ox.graph_from_point((latitude, longitude), dist=target_total_distance_km*200+2000, network_type='drive')
     graph = ox.utils_graph.get_undirected(graph)
@@ -119,4 +121,4 @@ def initialize_distance():
     return '', 204
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=7860)
