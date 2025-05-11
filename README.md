@@ -10,7 +10,7 @@ The algorithm has a tendecy of chosing a route heading to the north. It was impl
 You have **three options**:
 
 1. Download all the files and follow the steps I provide, or
-2. Visit this [**website**](http://lautaro98.pythonanywhere.com) where you can start right away (I recommend this option, but note that you won't be able to customize the algorithm).
+2. Visit the [**pythonanywhere website**](http://lautaro98.pythonanywhere.com) or the [**Hugging Face Space website**](https://huggingface.co/spaces/LautaroOcho/Walking-around-the-city) where you can start right away (I recommend this option, but note that you won't be able to customize the algorithm).
 3. Create a codespace (recommended if option 2 isn't working).
 
 For the **first option**, I recommend creating a separate environment to avoid interference with your current libraries.
