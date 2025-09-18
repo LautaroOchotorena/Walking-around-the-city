@@ -20,6 +20,7 @@ def get_coordinates(city):
 
 city = "La Plata, Buenos Aires, Argentina"
 target_total_distance_km = 3
+latitude, longitude = -34.9214, -57.9545
 get_coordinates(city)
 success = True
 
