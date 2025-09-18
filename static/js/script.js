@@ -80,6 +80,13 @@ function changeCity() {
 
                     // Optionally clear the input field if needed
                     document.getElementById('new_city').value = '';
+
+                    var selectedPoint = {
+                        latitude: data.latitude,
+                        longitude: data.longitude
+                    };
+                    // Send the selected point to the server
+                    sendSelectedPointToServer(selectedPoint);
                 } else {
                     alert(translations_data[currentLanguage][9]);
                 }
