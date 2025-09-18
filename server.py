@@ -9,21 +9,22 @@ app = Flask(__name__)
 
 def get_coordinates(city):
     global latitude, longitude
-    geolocator = Nominatim(user_agent="my_app")
     try:
+        geolocator = Nominatim(user_agent="my_app")
         location = geolocator.geocode(city)
         if location:
             latitude, longitude = location.latitude, location.longitude
             return True  # Success
-        else:
+
+    except:
+        try:
             geolocator = OpenCage(api_key="9a7dbb7f4ac84b0aa838239095bf3ce6")
             location = geolocator.geocode(city)
             if location:
                 latitude, longitude = location.latitude, location.longitude
                 return True  # Success
-            
-    except Exception as e:
-        print(f"Error in get_coordinates: {e}")
+        except Exception as e:
+            print(f"Error in get_coordinates: {e}")
     return False  # Failure
 
 city = "La Plata, Buenos Aires, Argentina"
