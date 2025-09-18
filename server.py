@@ -16,7 +16,7 @@ def get_coordinates(city):
             latitude, longitude = location.latitude, location.longitude
             return True  # Success
         else:
-            geolocator = OpenCage(api_key="9a7dbb7f4ac84b0aa838239095bf3ce6Y")
+            geolocator = OpenCage(api_key="9a7dbb7f4ac84b0aa838239095bf3ce6")
             location = geolocator.geocode(city)
             if location:
                 latitude, longitude = location.latitude, location.longitude
