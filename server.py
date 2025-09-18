@@ -3,6 +3,7 @@ import networkx as nx
 import osmnx as ox
 import random
 from geopy.geocoders import Nominatim
+from geopy.geocoders import OpenCage
 
 app = Flask(__name__)
 
@@ -14,6 +15,13 @@ def get_coordinates(city):
         if location:
             latitude, longitude = location.latitude, location.longitude
             return True  # Success
+        else:
+            geolocator = OpenCage(api_key="9a7dbb7f4ac84b0aa838239095bf3ce6Y")
+            location = geolocator.geocode(city)
+            if location:
+                latitude, longitude = location.latitude, location.longitude
+                return True  # Success
+            
     except Exception as e:
         print(f"Error in get_coordinates: {e}")
     return False  # Failure
