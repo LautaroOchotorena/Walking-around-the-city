@@ -3,53 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Add links to Folium and Leaflet libraries -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/folium@0.14.0"></script>
-    <!-- Cache configuration for static resources -->
-    <meta http-equiv="Cache-Control" content="max-age=3600"> <!-- Cache for 1 hour -->
+    <title>Walking Around the City</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- App Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <title>Change City</title>
-    <style>
-        #new_city::placeholder {
-            color: grey;
-        }
-    </style>
 </head>
 <body>
-    <!-- Button to select a point -->
-    <button onclick="enableSelection()" id="btnSelectStart">Select start</button>
-    <!-- Add a button to generate the route -->
-    <button onclick="generateRoute()" id="btnGenerateRoute">Generate route</button>
-    <!-- Distance button -->
-    <form method="post" action="{{ url_for('change_distance') }}" id="distanceForm">
-        <label for="target_distance" id="OneWayDistance">One-way distance (km):</label>
-        <input type="number" id="target_distance" name="target_distance" step="0.1" min="0" max="10" value="3" oninput="updateTargetDistance()">
-    </form>
-    <!-- Change city -->
-    <form method="post" action="{{ url_for('change_city') }}" onsubmit="event.preventDefault(); changeCity();">
-        <label for="new_city" id="City">City:</label>
-        <input type="text" id="new_city" name="new_city" required>
-        <button type="submit" id="Change">Change</button>
-    </form>
-    <!-- Map -->
-    <div id="map"></div>
-    <!-- Route lengths -->
-    <p id='Blue_route_length' style="display: inline;">Blue route length: </p><span id="first_route_length" style="display: inline;">0.00</span> km </p>
-    <p id='Red_route_length' style="display: inline;">Red route length: </p><span id="second_route_length" style="display: inline;">0.00</span> km </p>       
-    <p id='Total_route_length' style="display: inline;">Total: </p> <span id="total_length" style="display: inline;">0.00</span> km
-    <!-- Flags -->
-    <div class="top-right">
-        <img src="{{ url_for('static', filename='spanish_flag.webp') }}" alt="Spanish Flag" class="flag-icon" onclick="changeLanguage('es')">
-        <img src="{{ url_for('static', filename='english_flag.webp') }}" alt="English Flag" class="flag-icon" onclick="changeLanguage('en')">
+
+    <!-- Header -->
+    <header class="app-header">
+        <h1><span class="icon">🚶</span> <span id="appTitle">Walking Around the City</span></h1>
+        <div class="header-actions">
+            <button class="info-btn" onclick="toggleInfo()" aria-label="Info">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </button>
+            <div class="language-selector">
+                <img src="{{ url_for('static', filename='spanish_flag.webp') }}" alt="Español" class="flag-icon" id="flag-es" onclick="changeLanguage('es')">
+                <img src="{{ url_for('static', filename='english_flag.webp') }}" alt="English" class="flag-icon active" id="flag-en" onclick="changeLanguage('en')">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+                <!-- Settings -->
+        <div class="card">
+            <div class="card-body settings-body">
+                <!-- Distance -->
+                <form method="post" action="{{ url_for('change_distance') }}" id="distanceForm">
+                    <div class="form-group">
+                        <label for="target_distance" id="OneWayDistance">One-way distance (km)</label>
+                        <input type="number" id="target_distance" name="target_distance" step="0.1" min="0" max="10" value="3" oninput="updateTargetDistance()">
+                    </div>
+                </form>
+                <!-- City -->
+                <form method="post" action="{{ url_for('change_city') }}" onsubmit="event.preventDefault(); changeCity();">
+                    <div class="form-group">
+                        <label for="new_city" id="City">City</label>
+                            <div class="city-input-group">
+                                <input type="text" id="new_city" name="new_city" required>
+                                <button type="submit" class="btn btn-secondary" id="Change">Change</button>
+                            </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Map (primary element - first on mobile) -->
+        <div class="card map-wrapper">
+            <div id="map"></div>
+            <div class="map-hint" id="mapHint">
+                <span class="map-hint-icon">📍</span>
+                <span id="mapHintText">Tap on the map to set starting point</span>
+            </div>
+        </div>
+
+        <!-- Generate Route -->
+        <button class="btn btn-success btn-generate" onclick="generateRoute()" id="btnGenerateRoute">
+            🗺️ Generate route
+        </button>
+
+        <!-- Route Stats -->
+        <div class="stats-grid">
+            <div class="stat-card blue">
+                <div class="stat-label" id="Blue_route_length">Blue route</div>
+                <div class="stat-value"><span id="first_route_length">0.00</span></div>
+                <div class="stat-unit">km</div>
+            </div>
+            <div class="stat-card red">
+                <div class="stat-label" id="Red_route_length">Red route</div>
+                <div class="stat-value"><span id="second_route_length">0.00</span></div>
+                <div class="stat-unit">km</div>
+            </div>
+            <div class="stat-card total">
+                <div class="stat-label" id="Total_route_length">Total</div>
+                <div class="stat-value"><span id="total_length">0.00</span></div>
+                <div class="stat-unit">km</div>
+            </div>
+        </div>
+
     </div>
+
+    <!-- Info Modal -->
+    <div class="info-overlay" id="infoOverlay" onclick="closeInfoFromOverlay(event)">
+        <div class="info-modal">
+            <div class="info-modal-header">
+                <h2 id="howItWorksTitle">How it works</h2>
+                <button class="info-close" onclick="toggleInfo()" aria-label="Close">&times;</button>
+            </div>
+            <div class="steps-list">
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <p id="step1">Choose a city or use the default one. You can change it anytime.</p>
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <p id="step2">Tap on the map to set your starting point.</p>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <p id="step3">Set the one-way distance you want to walk (0–10 km).</p>
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <p id="step4">Press "Generate route" to get a walking loop. The blue route goes out, and the red route brings you back.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Map Init Script -->
     <script>
-        // Load map
         var latitude = {{ latitude }};
         var longitude = {{ longitude }};
-        var map = L.map('map').setView([latitude, longitude], 15);
+        var map = L.map('map', {
+            zoomControl: true,
+            scrollWheelZoom: true
+        }).setView([latitude, longitude], 15);
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            maxZoom: 19
         }).addTo(map);
     </script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
