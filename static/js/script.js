@@ -11,6 +11,7 @@ var translations_data = {
         total: 'Total',
         errorDistance: 'Error: La distancia debe estar entre 0 y 10.',
         errorCity: 'No se pudo cargar la ciudad, intente de nuevo.',
+        routeError: 'No se pudo generar el recorrido, intente de nuevo.',
         placeholder: 'Ingrese una ciudad...',
         generating: 'Generando...',
         startSet: 'Punto de inicio establecido',
@@ -34,6 +35,7 @@ var translations_data = {
         total: 'Total',
         errorDistance: 'Error: The target distance must be between 0 and 10.',
         errorCity: 'Failed to load the city, please try again.',
+        routeError: 'The route could not be generated. Please try again.',
         placeholder: 'Enter a city...',
         generating: 'Generating...',
         startSet: 'Starting point set',
@@ -221,7 +223,12 @@ function generateRoute() {
     if (secondPolyline) map.removeLayer(secondPolyline);
 
     fetch('/generate_route')
-        .then(function(response) { return response.json(); })
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Route generation failed with status ' + response.status);
+            }
+            return response.json();
+        })
         .then(function(data) {
             btn.classList.remove('loading');
             btn.disabled = false;
@@ -252,6 +259,7 @@ function generateRoute() {
         .catch(function(error) {
             btn.classList.remove('loading');
             btn.disabled = false;
+            showToast(t('routeError'), true);
             console.error('Error generating routes:', error);
         });
 }

@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, m
 import networkx as nx
 import osmnx as ox
 import random
+from functools import lru_cache
 from geopy.geocoders import Nominatim
 from geopy.geocoders import OpenCage
 
@@ -33,26 +34,44 @@ latitude, longitude = -34.9214, -57.9545
 get_coordinates(city)
 success = True
 
-ox.settings.use_cache = False
+ox.settings.use_cache = True
+
+
+@lru_cache(maxsize=8)
+def get_graph(latitude_value, longitude_value, distance_meters):
+    """Load and prepare a graph once for repeated route requests."""
+    graph = ox.graph_from_point(
+        (latitude_value, longitude_value),
+        dist=distance_meters,
+        network_type='drive'
+    )
+    if hasattr(ox, 'convert') and hasattr(ox.convert, 'to_undirected'):
+        return ox.convert.to_undirected(graph)
+    return ox.utils_graph.get_undirected(graph)
 
 def generate_route():
-    graph = ox.graph_from_point((latitude, longitude), dist=target_total_distance_km*200+2000, network_type='drive')
-    graph = ox.utils_graph.get_undirected(graph)
+    graph = get_graph(
+        latitude,
+        longitude,
+        round(target_total_distance_km * 200 + 2000)
+    )
 
     # Find the nearest node
     start_node = ox.distance.nearest_nodes(graph, X=longitude, Y=latitude)
 
     # Initialize the existing path
     route = [start_node]
+    route_nodes = {start_node}
 
     traveled_distance_km = 0.0
     # Attempt to generate a closed circuit of 5 km without repeating nodes
     while traveled_distance_km < target_total_distance_km:
         current_node = route[-1]
-        unvisited_nodes = set(graph.neighbors(current_node)) - set(route)
+        unvisited_nodes = set(graph.neighbors(current_node)) - route_nodes
 
         if not unvisited_nodes:
             route = [start_node]
+            route_nodes = {start_node}
             traveled_distance_km = 0.0
             continue
 
@@ -65,12 +84,18 @@ def generate_route():
 
         distance_between_nodes_km = graph[current_node][next_node][0]['length'] / 1000.0
         route.append(next_node)
+        route_nodes.add(next_node)
         traveled_distance_km += distance_between_nodes_km
 
     # Find the shortest path from the last node of the existing path back to the initial node
     final_node = route[-1]
-    new_route = nx.shortest_path(graph, source=final_node, target=start_node, weight='length')[0:]
-    new_route_length = nx.shortest_path_length(graph, source=final_node, target=start_node, weight='length')/1000.0
+    new_route_length, new_route = nx.single_source_dijkstra(
+        graph,
+        source=final_node,
+        target=start_node,
+        weight='length'
+    )
+    new_route_length /= 1000.0
 
     coordinates_route_1 = [(graph.nodes[node]['y'], graph.nodes[node]['x']) for node in route]
     coordinates_route_2 = [(graph.nodes[node]['y'], graph.nodes[node]['x']) for node in new_route]
@@ -82,11 +107,15 @@ def index():
 
 @app.route('/generate_route')
 def generate_route_ajax():
-    first_route, second_route, first_route_distance, second_route_distance = generate_route()
-    return jsonify({'first_route': first_route,
-                    'second_route': second_route,
-                    'first_route_length': first_route_distance,
-                    'second_route_length': second_route_distance})
+    try:
+        first_route, second_route, first_route_distance, second_route_distance = generate_route()
+        return jsonify({'first_route': first_route,
+                        'second_route': second_route,
+                        'first_route_length': first_route_distance,
+                        'second_route_length': second_route_distance})
+    except Exception:
+        app.logger.exception("Error generating route")
+        return jsonify({'error': 'Unable to generate a route right now.'}), 500
 
 # Route to handle the selected point from the client
 @app.route('/handle_selected_point', methods=['POST'])
